@@ -1,4 +1,4 @@
-# app.py - APEX Personal (funktionierend)
+# app.py - APEX Personal (sauber, funktionierend)
 # Passwort: bnc2500
 # Benötigt: streamlit, requests, pandas, numpy, plotly
 
@@ -74,4 +74,72 @@ def fetch_market_chart(symbol, days=90):
     url = f"https://api.coingecko.com/api/v3/coins/{cid}/market_chart"
     params = {"vs_currency": "usd", "days": days, "interval": "hourly" if days <= 90 else "daily"}
     r = requests.get(url, params=params, timeout=15)
-    r.
+    r.raise_for_status()
+    data = r.json()
+    prices = data.get("prices", [])
+    df = pd.DataFrame(prices, columns=["timestamp", "price"])
+    df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
+    return df
+
+# ---------------------
+# Technical: RSI
+# ---------------------
+def compute_rsi(series, period=14):
+    if series is None or series.empty:
+        return pd.Series(dtype=float)
+    delta = series.diff()
+    up = delta.clip(lower=0)
+    down = -delta.clip(upper=0)
+    ma_up = up.ewm(alpha=1/period, adjust=False).mean()
+    ma_down = down.ewm(alpha=1/period, adjust=False).mean()
+    rs = ma_up / ma_down.replace(0, np.nan)
+    rsi = 100 - (100 / (1 + rs))
+    return rsi
+
+# ---------------------
+# CSV helpers
+# ---------------------
+def holdings_to_csv(holdings):
+    df = pd.DataFrame(list(holdings.items()), columns=["Coin", "Menge"])
+    buf = io.StringIO()
+    df.to_csv(buf, index=False)
+    buf.seek(0)
+    return buf
+
+def csv_to_holdings(uploaded):
+    try:
+        df = pd.read_csv(uploaded)
+        out = {}
+        for _, row in df.iterrows():
+            coin = str(row.get("Coin", "")).strip().upper()
+            if coin in COINS:
+                try:
+                    amt = float(row.get("Menge", 0) or 0)
+                except Exception:
+                    amt = 0.0
+                if amt > 0:
+                    out[coin] = amt
+        return out
+    except Exception:
+        return None
+
+# ---------------------
+# Portfolio & signals helpers
+# ---------------------
+def portfolio_df(holdings, prices):
+    rows = []
+    for sym, amt in holdings.items():
+        info = prices.get(sym, {})
+        p = info.get("price")
+        val = p * amt if p is not None else None
+        chg = info.get("change_24h")
+        rows.append({"Coin": sym, "Menge": amt, "Preis (USD)": p, "Wert (USD)": val, "24h %": chg})
+    return pd.DataFrame(rows)
+
+def trading_signal_enhanced(change24, rsi):
+    if change24 is None:
+        base = 0
+    else:
+        if change24 >= 8:
+            base = 2
+    
