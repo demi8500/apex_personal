@@ -62,39 +62,17 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Main app
-def main():
-    st.markdown('<div class="main-header">📈 APEX Personal</div>', unsafe_allow_html=True)
+# Initialize session state
+if 'authenticated' not in st.session_state:
+    st.session_state.authenticated = False
+
+def login_page():
+    st.markdown('<div class="main-header">🔐 APEX Personal Login</div>', unsafe_allow_html=True)
     
-    # Login form
-    with st.sidebar:
-        st.header("🔐 Login")
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
-        
-        if st.button("Login"):
-            if username == "admin" and password == "password":
-                st.success("Login erfolgreich!")
-            else:
-                st.error("Falsche Anmeldedaten!")
+    col1, col2, col3 = st.columns([1, 2, 1])
     
-    # Main content
-    tab1, tab2, tab3 = st.tabs(["📊 Dashboard", "💰 Portfolio", "🎯 Signale"])
-    
-    with tab1:
-        st.header("Dashboard")
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            st.metric("BTC", "$67,543", "2.4%")
-        with col2:
-            st.metric("ETH", "$3,234", "1.8%")
-        with col3:
-            st.metric("SOL", "$156", "5.2%")
-        with col4:
-            st.metric("Portfolio", "$15,430", "3.1%")
-    
-    with tab2:
-        st.header("Portfolio Übersicht")
-        
-        portfolio_data = {
+    with col2:
+        with st.form("login_form"):
+            username = st.text_input("Username", placeholder="Geben Sie Ihren Benutzernamen ein")
+            password = st.text_input("Password", type="password", placeholder="Geben Sie Ihr Passwort ein")
+            login_button = st.form_submit
