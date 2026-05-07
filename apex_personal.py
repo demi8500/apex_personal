@@ -20,11 +20,11 @@ if not st.session_state.auth:
             st.error("Falsches Passwort")
     st.stop()
 
-st.title("🌟 APEX Personal")
-st.subheader("Trading Signals + Portfolio")
+st.title("🌟 APEX Personal - Finale Version")
+st.subheader("Viele Coins + Trading Signals")
 
 # Viele Coins
-coins_list = ["BTC", "ETH", "SOL", "BNB", "XRP", "DOGE", "ADA", "AVAX", "LINK", "TON", "SHIB", "DOT", "NEAR", "UNI", "TRX"]
+coins = ["BTC", "ETH", "SOL", "BNB", "XRP", "DOGE", "ADA", "AVAX", "LINK", "TON", "SHIB", "DOT", "NEAR", "UNI", "TRX", "SUI", "PEPE"]
 
 # Live Preise
 @st.cache_data(ttl=30)
@@ -40,7 +40,7 @@ prices = get_prices()
 
 # Portfolio
 if "my_holdings" not in st.session_state:
-    st.session_state.my_holdings = {coin: 0.0 for coin in coins_list}
+    st.session_state.my_holdings = {coin: 0.0 for coin in coins}
 
 menu = st.sidebar.selectbox("Menü", ["Dashboard", "Trading Signals", "Holdings bearbeiten", "Neue Investition", "Live Preise"])
 
@@ -53,19 +53,47 @@ if menu == "Dashboard":
             value = amount * price
             total += value
             data.append({"Coin": coin, "Menge": amount, "Wert ($)": round(value, 2)})
-    st.metric("Gesamtwert", f"${total:,.2f}")
+    st.metric("Gesamtwert Portfolio", f"${total:,.2f}")
     if data:
         st.dataframe(pd.DataFrame(data), use_container_width=True)
 
 elif menu == "Trading Signals":
-    st.subheader("🔥 Trading Signals")
-    st.caption("Simulierte Signale - nur zu Bildungszwecken")
+    st.subheader("🔥 Trading Signals (viele Coins)")
+    st.caption("Simulierte Signale – nur zu Bildungszwecken")
+    
+    cols = st.columns(3)
+    i = 0
+    for coin in coins:
+        with cols[i % 3]:
+            price = prices.get(coin.lower().replace("xrp","ripple").replace("doge","dogecoin").replace("shib","shiba-inu"), {}).get("usd", 1000)
+            signal = random.choice(["STRONG BUY", "BUY", "HOLD", "SELL", "STRONG SELL"])
+            if "BUY" in signal:
+                st.success(f"**{coin}**\n{signal}\n${price:,.4f}")
+            elif "SELL" in signal:
+                st.error(f"**{coin}**\n{signal}\n${price:,.4f}")
+            else:
+                st.warning(f"**{coin}**\n{signal}\n${price:,.4f}")
+        i += 1
 
-    for coin in coins_list:
-        price = prices.get(coin.lower().replace("xrp","ripple").replace("doge","dogecoin").replace("shib","shiba-inu"), {}).get("usd", 1000)
-        signal = random.choice(["STRONG BUY", "BUY", "HOLD", "SELL", "STRONG SELL"])
-        
-        if "BUY" in signal:
-            st.success(f"**{coin}** → {signal} → ${price:,.4f}")
-        elif "SELL" in signal:
-            st.error(f"
+elif menu == "Holdings bearbeiten":
+    st.subheader("Deine echten Holdings bearbeiten")
+    for coin in coins:
+        st.session_state.my_holdings[coin] = st.number_input(f"{coin} Menge", value=st.session_state.my_holdings[coin], step=0.00001, format="%.5f")
+    if st.button("Speichern"):
+        st.success("Holdings gespeichert!")
+
+elif menu == "Neue Investition":
+    amount = st.number_input("Betrag USDC", min_value=10.0, value=500.0)
+    coin = st.selectbox("Coin", coins)
+    if st.button("Speichern"):
+        current_price = prices.get(coin.lower().replace("xrp","ripple").replace("doge","dogecoin"), {}).get("usd", 1000)
+        st.session_state.my_holdings[coin] += amount / current_price
+        st.success(f"{amount}$ in {coin} hinzugefügt!")
+
+elif menu == "Live Preise":
+    st.subheader("Live Preise")
+    for coin in coins:
+        price = prices.get(coin.lower().replace("xrp","ripple").replace("doge","dogecoin"), {}).get("usd", 0)
+        st.metric(coin, f"${price:,.4f}")
+
+st.caption("APEX Personal - Mit vielen Coins | Nur für dich")
