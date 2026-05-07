@@ -22,7 +22,7 @@ if not st.session_state.authenticated:
     st.title("🔒 APEX Personal")
     password = st.text_input("Gib dein Passwort ein:", type="password")
     if st.button("Login"):
-        if password == "apex2026":
+        if password == "Vorimeds2502.":
             st.session_state.authenticated = True
             st.rerun()
         else:
