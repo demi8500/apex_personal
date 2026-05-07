@@ -79,14 +79,4 @@ COIN_MAPPING = {
     'ETH': 'ethereum', 
     'SOL': 'solana',
     'BNB': 'binancecoin',
-    'XRP': 'ripple',
-    'DOGE': 'dogecoin',
-    'SHIB': 'shiba-inu',
-    'PEPE': 'pepe',
-    'BONK': 'bonk',
-    'WIF': 'dogwifcoin',
-    'FLOKI': 'floki',
-    'ADA': 'cardano',
-    'AVAX': 'avalanche-2',
-    'LINK': 'chainlink',
-    'TON': 'the
+    'XRP': '
