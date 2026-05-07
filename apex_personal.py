@@ -63,4 +63,25 @@ def login():
             except Exception:
                 pass
         else:
-      
+            st.error("Falsches Passwort")
+
+if not st.session_state["authenticated"]:
+    login()
+    st.stop()
+
+# Price fetch with simple caching
+def fetch_prices(symbols):
+    now = time.time()
+    if now - st.session_state["price_ts"] < 30 and st.session_state["price_cache"]:
+        return st.session_state["price_cache"]
+    ids = ",".join(COINS[s] for s in symbols)
+    url = "https://api.coingecko.com/api/v3/simple/price"
+    params = {"ids": ids, "vs_currencies": "usd", "include_24hr_change": "true"}
+    try:
+        r = requests.get(url, params=params, timeout=10)
+        r.raise_for_status()
+        data = r.json()
+        out = {}
+        for s in symbols:
+            cid = COINS[s]
+            entry 
