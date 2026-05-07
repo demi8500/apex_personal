@@ -1,4 +1,4 @@
-# app.py - APEX Personal (vollständig, korrigiert)
+# app.py - APEX Personal (funktionierende Single-File Streamlit-App)
 # Passwort: bnc2500
 # Benötigt: streamlit, requests, pandas, numpy, plotly
 # Install: pip install streamlit requests pandas numpy plotly
@@ -59,4 +59,8 @@ def fetch_prices(symbols):
     url = "https://api.coingecko.com/api/v3/simple/price"
     params = {"ids": ids, "vs_currencies": "usd", "include_24hr_change": "true"}
     r = requests.get(url, params=params, timeout=10)
-    r.raise_f
+    r.raise_for_status()
+    data = r.json()
+    out = {}
+    for s in symbols:
+       
