@@ -5,7 +5,7 @@ import random
 
 st.set_page_config(page_title="APEX Personal", layout="wide", page_icon="🌟")
 
-# Passwort
+# Passwortschutz
 if "auth" not in st.session_state:
     st.session_state.auth = False
 
@@ -21,16 +21,16 @@ if not st.session_state.auth:
     st.stop()
 
 st.title("🌟 APEX Personal")
-st.subheader("Major Coins + Memecoins")
+st.subheader("Alle Coins + Memecoins + Trading Signals")
 
-# Alle Coins (Major + Memecoins)
-coins = ["BTC", "ETH", "SOL", "BNB", "XRP", "DOGE", "SHIB", "PEPE", "BONK", "WIF", "FLOKI", "BRETT", "POPCAT", "ADA", "AVAX", "LINK", "TON"]
+# Coins Liste (Major + Memecoins)
+coins = ["BTC", "ETH", "SOL", "BNB", "XRP", "DOGE", "SHIB", "PEPE", "BONK", "WIF", "FLOKI", "ADA", "AVAX", "LINK", "TON"]
 
 # Live Preise
 @st.cache_data(ttl=30)
 def get_prices():
     try:
-        ids = "bitcoin,ethereum,solana,binancecoin,ripple,dogecoin,shiba-inu,pepe,bonk,dogwifhat,floki,brett,popcat,cardano,avalanche-2,chainlink,toncoin"
+        ids = "bitcoin,ethereum,solana,binancecoin,ripple,dogecoin,shiba-inu,pepe,bonk,dogwifhat,floki,cardano,avalanche-2,chainlink,toncoin"
         r = requests.get(f"https://api.coingecko.com/api/v3/simple/price?ids={ids}&vs_currencies=usd")
         return r.json()
     except:
@@ -49,7 +49,7 @@ if menu == "Dashboard":
     data = []
     for coin, amount in st.session_state.my_holdings.items():
         if amount > 0:
-            price = prices.get(coin.lower().replace("wif","dogwifhat").replace("shib","shiba-inu").replace("pepe","pepe").replace("bonk","bonk"), {}).get("usd", 0)
+            price = prices.get(coin.lower().replace("wif","dogwifhat").replace("shib","shiba-inu"), {}).get("usd", 0)
             value = amount * price
             total += value
             data.append({"Coin": coin, "Menge": amount, "Wert ($)": round(value, 2)})
@@ -58,12 +58,8 @@ if menu == "Dashboard":
         st.dataframe(pd.DataFrame(data), use_container_width=True)
 
 elif menu == "Trading Signals":
-    st.subheader("🔥 Trading Signals (inkl. Memecoins)")
+    st.subheader("🔥 Trading Signals")
     st.caption("Simulierte Signale – nur zu Bildungszwecken")
     
-    cols = st.columns(3)
-    i = 0
     for coin in coins:
-        with cols[i % 3]:
-            price = prices.get(coin.lower().replace("wif","dogwifhat").replace("shib","shiba-inu").replace("pepe","pepe").replace("bonk","bonk"), {}).get("usd", 1000)
-            signal = random.choice(["STRONG BUY", "BUY", "HOLD", "SELL", "STRONG SELL
+        price = prices.get(coin.lower().replace("wif","dogwifhat").replace("shib","shiba-in
