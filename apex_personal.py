@@ -1,87 +1,64 @@
-# app.py - APEX Personal (minimal, fehlerfrei)
-# Passwort: bnc2500
-# Benötigt: streamlit, requests, pandas
-# Install: python -m pip install streamlit requests pandas
+# APEX Personal - Single-file Streamlit App
+# Datum (für Referenz): 05/07/2026
+# Beschreibung: Portfolio-Tool mit Passwortschutz, CoinGecko-Preisen, Signals, Holdings-Management, Simulator.
+# Passwort: "bnc2500"
+#
+# Hinweise:
+# - Einfacher Passwortschutz (nur für Demo). In Produktion bitte sichere Auth/HTTPS verwenden.
+# - Holdings werden in st.session_state gespeichert und optional lokal in "holdings.json".
+# - Benötigte Bibliotheken: streamlit, requests, pandas, numpy
+#   Install: pip install streamlit requests pandas numpy
 
-import io
-import time
-import requests
 import streamlit as st
+import requests
 import pandas as pd
+import numpy as np
+import json
+import os
+from datetime import datetime
 
-st.set_page_config("APEX Personal", layout="wide")
+# ---------------------------
+# Konfiguration
+# ---------------------------
+st.set_page_config(page_title="APEX Personal", layout="wide", initial_sidebar_state="expanded")
+PASSWORD = "bnc2500"
+HOLDINGS_FILE = "holdings.json"  # optional persistence
+COINS = ["bitcoin", "ethereum", "solana", "binancecoin", "ripple", "dogecoin",
+         "shiba-inu", "pepe", "bonk", "wif", "floki", "cardano", "avalanche-2",
+         "chainlink", "toncoin"]
+# Display names mapping (CoinGecko id -> ticker/pretty)
+DISPLAY = {
+    "bitcoin": "BTC", "ethereum": "ETH", "solana": "SOL", "binancecoin": "BNB",
+    "ripple": "XRP", "dogecoin": "DOGE", "shiba-inu": "SHIB", "pepe": "PEPE",
+    "bonk": "BONK", "wif": "WIF", "floki": "FLOKI", "cardano": "ADA",
+    "avalanche-2": "AVAX", "chainlink": "LINK", "toncoin": "TON"
+}
+COINGECKO_API = "https://api.coingecko.com/api/v3"
 
-# Minimal CSS (optional)
+# ---------------------------
+# Styling (dunkles, modernes Design)
+# ---------------------------
 st.markdown(
     """
     <style>
-    .block-container { background-color: #0b1020; color: #d6e1ff; }
-    .stButton>button { background-color:#0f62fe;color:white; }
+    /* Hintergrund dunkel */
+    .stApp {
+        background-color: #0f1720;
+        color: #e6eef8;
+    }
+    /* Sidebar style */
+    .css-1d391kg { background-color: #0b1220 !important; }
+    .css-1y4p8pa { background-color: #0b1220 !important; }
+    /* Karten/Boxes */
+    .card {
+        background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+        border-radius: 8px;
+        padding: 12px;
+    }
+    /* Tabellen */
+    .stDataFrame table { color: #e6eef8; }
+    /* Inputs text color */
+    input, textarea { color: #e6eef8; background: #07101a !important; }
     </style>
     """,
-    unsafe_allow_html=True,
-)
-
-# Coins
-COINS = {
-    "BTC": "bitcoin",
-    "ETH": "ethereum",
-    "SOL": "solana",
-    "BNB": "binancecoin",
-    "XRP": "ripple",
-    "DOGE": "dogecoin",
-    "SHIB": "shiba-inu",
-    "PEPE": "pepe",
-    "BONK": "bonk",
-    "WIF": "wif",
-    "FLOKI": "floki",
-    "ADA": "cardano",
-    "AVAX": "avalanche-2",
-    "LINK": "chainlink",
-    "TON": "toncoin",
-}
-
-# Session defaults
-if "authenticated" not in st.session_state:
-    st.session_state["authenticated"] = False
-if "holdings" not in st.session_state:
-    st.session_state["holdings"] = {"BTC": 0.01, "ETH": 0.1}
-if "price_cache" not in st.session_state:
-    st.session_state["price_cache"] = {}
-if "price_ts" not in st.session_state:
-    st.session_state["price_ts"] = 0.0
-
-# Auth
-def login():
-    st.title("APEX Personal — Login")
-    pwd = st.text_input("Passwort", type="password", key="login_pwd")
-    if st.button("Anmelden"):
-        if pwd == "bnc2500":
-            st.session_state["authenticated"] = True
-            try:
-                st.experimental_rerun()
-            except Exception:
-                pass
-        else:
-            st.error("Falsches Passwort")
-
-if not st.session_state["authenticated"]:
-    login()
-    st.stop()
-
-# Price fetch with simple caching
-def fetch_prices(symbols):
-    now = time.time()
-    if now - st.session_state["price_ts"] < 30 and st.session_state["price_cache"]:
-        return st.session_state["price_cache"]
-    ids = ",".join(COINS[s] for s in symbols)
-    url = "https://api.coingecko.com/api/v3/simple/price"
-    params = {"ids": ids, "vs_currencies": "usd", "include_24hr_change": "true"}
-    try:
-        r = requests.get(url, params=params, timeout=10)
-        r.raise_for_status()
-        data = r.json()
-        out = {}
-        for s in symbols:
-            cid = COINS[s]
-            entry 
+    unsafe_allow_html=Tr
