@@ -54,19 +54,19 @@ COIN_SYMBOLS = list(COINS.keys())
 # ---------------------
 # Utilities: CoinGecko
 # ---------------------
-def fetch_prices(symbols):
-    ids = ",".join(COINS[s] for s in symbols)
-    url = "https://api.coingecko.com/api/v3/simple/price"
-    params = {"ids": ids, "vs_currencies": "usd", "include_24hr_change": "true"}
-    r = requests.get(url, params=params, timeout=10)
+def fetch_market_chart(symbol, days=90):
+    cid = COINS.get(symbol)
+    if not cid:
+        return pd.DataFrame(columns=["timestamp", "price"])
+    url = f"https://api.coingecko.com/api/v3/coins/{cid}/market_chart"
+    params = {"vs_currency": "usd", "days": days, "interval": "hourly" if days <= 90 else "daily"}
+    r = requests.get(url, params=params, timeout=15)
     r.raise_for_status()
     data = r.json()
-    out = {}
-    for s in symbols:
-        cid = COINS[s]
-        entry = data.get(cid, {})
-        out[s] = {"price": entry.get("usd"), "change_24h": entry.get("usd_24h_change")}
-    return out
+    prices = data.get("prices", [])
+    df = pd.DataFrame(prices, columns=["timestamp", "price"])
+    df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
+    return df
 
 def fetch_market_chart(symbol, days=90):
     cid = COINS.get(symbol)
