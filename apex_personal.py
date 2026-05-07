@@ -21,7 +21,7 @@ if not st.session_state.auth:
     st.stop()
 
 st.title("🌟 APEX Personal v6.3")
-st.subheader("Trading Signals + Echte Portfolio Verwaltung")
+st.subheader("Trading Signals + Portfolio")
 
 # Live Preise
 @st.cache_data(ttl=30)
@@ -49,4 +49,31 @@ if menu == "Dashboard":
             price = prices.get(coin.lower().replace("xrp","ripple").replace("doge","dogecoin").replace("shib","shiba-inu").replace("dot","polkadot").replace("near","near-protocol").replace("uni","uniswap").replace("trx","tron"), {}).get("usd", 0)
             value = amount * price
             total += value
-            data.append({"Coin": coin, "Menge": amount, "W
+            data.append({"Coin": coin, "Menge": amount, "Wert ($)": round(value, 2)})
+    st.metric("Gesamtwert Portfolio", f"${total:,.2f}")
+    if data:
+        st.dataframe(pd.DataFrame(data), use_container_width=True)
+
+elif menu == "Trading Signals":
+    st.subheader("🔥 APEX Trading Signals")
+    st.caption("Simulierte Signale — nur zu Bildungszwecken")
+
+    cols = st.columns(3)
+    i = 0
+    for coin in st.session_state.my_holdings.keys():
+        with cols[i % 3]:
+            price = prices.get(coin.lower().replace("xrp","ripple").replace("doge","dogecoin").replace("shib","shiba-inu").replace("dot","polkadot").replace("near","near-protocol").replace("uni","uniswap").replace("trx","tron"), {}).get("usd", 1000)
+            signal = random.choice(["STRONG BUY", "BUY", "HOLD", "SELL", "STRONG SELL"])
+            
+            if "STRONG BUY" in signal or "BUY" in signal:
+                st.success(f"**{coin}**\n{signal}\n${price:,.4f}")
+            elif "SELL" in signal:
+                st.error(f"**{coin}**\n{signal}\n${price:,.4f}")
+            else:
+                st.warning(f"**{coin}**\n{signal}\n${price:,.4f}")
+        i += 1
+
+elif menu == "Holdings bearbeiten":
+    st.subheader("Holdings bearbeiten")
+    for coin in st.session_state.my_holdings.keys():
+        st.session_state.my_holdings[coin] = st.number_input(f"{coin
