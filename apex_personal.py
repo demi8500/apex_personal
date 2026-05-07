@@ -1,20 +1,17 @@
-# app.py - APEX Personal (abgespeckt, fehlerfrei)
+# app.py - APEX Personal (minimal, fehlerfrei)
 # Passwort: bnc2500
 # Benötigt: streamlit, requests, pandas
 # Install: python -m pip install streamlit requests pandas
-# Start: python -m streamlit run app.py
 
-import time
 import io
+import time
 import requests
 import streamlit as st
 import pandas as pd
 
 st.set_page_config("APEX Personal", layout="wide")
 
-# ---------------------
-# Minimal dark-ish CSS (optional)
-# ---------------------
+# Minimal CSS (optional)
 st.markdown(
     """
     <style>
@@ -25,9 +22,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# ---------------------
 # Coins
-# ---------------------
 COINS = {
     "BTC": "bitcoin",
     "ETH": "ethereum",
@@ -46,9 +41,7 @@ COINS = {
     "TON": "toncoin",
 }
 
-# ---------------------
 # Session defaults
-# ---------------------
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 if "holdings" not in st.session_state:
@@ -56,11 +49,9 @@ if "holdings" not in st.session_state:
 if "price_cache" not in st.session_state:
     st.session_state.price_cache = {}
 if "price_ts" not in st.session_state:
-    st.session_state.price_ts = 0
+    st.session_state.price_ts = 0.0
 
-# ---------------------
 # Auth
-# ---------------------
 def login():
     st.title("APEX Personal — Login")
     pwd = st.text_input("Passwort", type="password")
@@ -78,7 +69,35 @@ if not st.session_state.authenticated:
     login()
     st.stop()
 
-# ---------------------
-# Simple CoinGecko price fetch with caching (30s)
-# ---------------------
-def fetch_prices(sy
+# Price fetch with simple caching
+def fetch_prices(symbols):
+    now = time.time()
+    if now - st.session_state.price_ts < 30 and st.session_state.price_cache:
+        return st.session_state.price_cache
+    ids = ",".join(COINS[s] for s in symbols)
+    url = "https://api.coingecko.com/api/v3/simple/price"
+    params = {"ids": ids, "vs_currencies": "usd", "include_24hr_change": "true"}
+    try:
+        r = requests.get(url, params=params, timeout=10)
+        r.raise_for_status()
+        data = r.json()
+        out = {}
+        for s in symbols:
+            cid = COINS[s]
+            entry = data.get(cid, {})
+            out[s] = {"price": entry.get("usd"), "change_24h": entry.get("usd_24h_change")}
+        st.session_state.price_cache = out
+        st.session_state.price_ts = now
+        return out
+    except Exception:
+        if st.session_state.price_cache:
+            return st.session_state.price_cache
+        return {s: {"price": None, "change_24h": None} for s in symbols}
+
+# Helpers
+def portfolio_df(holdings, prices):
+    rows = []
+    for coin, amt in holdings.items():
+        info = prices.get(coin, {})
+        p = info.get("price")
+        val = p * amt if p is no
