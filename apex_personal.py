@@ -5,7 +5,7 @@ import random
 
 st.set_page_config(page_title="APEX Personal", layout="wide", page_icon="🌟")
 
-# Passwortschutz
+# Passwort
 if "auth" not in st.session_state:
     st.session_state.auth = False
 
@@ -20,15 +20,14 @@ if not st.session_state.auth:
             st.error("Falsches Passwort")
     st.stop()
 
-st.title("🌟 APEX Personal v6.4")
+st.title("🌟 APEX Personal")
 st.subheader("Trading Signals + Portfolio")
 
 # Live Preise
 @st.cache_data(ttl=30)
 def get_prices():
     try:
-        ids = "bitcoin,ethereum,solana,binancecoin,ripple,dogecoin,cardano,avalanche-2,chainlink"
-        r = requests.get(f"https://api.coingecko.com/api/v3/simple/price?ids={ids}&vs_currencies=usd")
+        r = requests.get("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd")
         return r.json()
     except:
         return {}
@@ -37,7 +36,7 @@ prices = get_prices()
 
 # Portfolio
 if "my_holdings" not in st.session_state:
-    st.session_state.my_holdings = {"BTC": 0.0, "ETH": 0.0, "SOL": 0.0, "BNB": 0.0, "XRP": 0.0, "DOGE": 0.0, "ADA": 0.0, "AVAX": 0.0, "LINK": 0.0}
+    st.session_state.my_holdings = {"BTC": 0.0, "ETH": 0.0, "SOL": 0.0}
 
 menu = st.sidebar.selectbox("Menü", ["Dashboard", "Trading Signals", "Holdings bearbeiten", "Neue Investition", "Live Preise"])
 
@@ -46,18 +45,44 @@ if menu == "Dashboard":
     data = []
     for coin, amount in st.session_state.my_holdings.items():
         if amount > 0:
-            price = prices.get(coin.lower().replace("xrp","ripple").replace("doge","dogecoin"), {}).get("usd", 0)
+            price = prices.get(coin.lower(), {}).get("usd", 0)
             value = amount * price
             total += value
             data.append({"Coin": coin, "Menge": amount, "Wert ($)": round(value, 2)})
-    st.metric("Gesamtwert Portfolio", f"${total:,.2f}")
+    st.metric("Gesamtwert", f"${total:,.2f}")
     if data:
         st.dataframe(pd.DataFrame(data), use_container_width=True)
 
 elif menu == "Trading Signals":
-    st.subheader("🔥 APEX Trading Signals")
-    st.caption("Simulierte Signale – nur zu Bildungszwecken")
+    st.subheader("🔥 Trading Signals")
+    for coin in ["BTC", "ETH", "SOL"]:
+        price = prices.get(coin.lower(), {}).get("usd", 1000)
+        signal = random.choice(["STRONG BUY", "BUY", "HOLD", "SELL", "STRONG SELL"])
+        if "BUY" in signal:
+            st.success(f"{coin} → {signal} → ${price:,.2f}")
+        elif "SELL" in signal:
+            st.error(f"{coin} → {signal} → ${price:,.2f}")
+        else:
+            st.warning(f"{coin} → {signal} → ${price:,.2f}")
 
+elif menu == "Holdings bearbeiten":
+    st.subheader("Holdings bearbeiten")
     for coin in st.session_state.my_holdings.keys():
-        price = prices.get(coin.lower().replace("xrp","ripple").replace("doge","dogecoin"), {}).get("usd", 1000)
-        signal = random.choice(["STRONG BUY", "BUY", "
+        st.session_state.my_holdings[coin] = st.number_input(f"{coin} Menge", value=st.session_state.my_holdings[coin], step=0.0001)
+    if st.button("Speichern"):
+        st.success("Gespeichert!")
+
+elif menu == "Neue Investition":
+    amount = st.number_input("Betrag USDC", min_value=10.0, value=500.0)
+    coin = st.selectbox("Coin", ["BTC", "ETH", "SOL"])
+    if st.button("Speichern"):
+        current_price = prices.get(coin.lower(), {}).get("usd", 1000)
+        st.session_state.my_holdings[coin] += amount / current_price
+        st.success(f"{amount}$ in {coin} hinzugefügt!")
+
+elif menu == "Live Preise":
+    st.subheader("Live Preise")
+    for coin, data in prices.items():
+        st.metric(coin.upper(), f"${data['usd']:,.2f}")
+
+st.caption("APEX Personal | Nur für dich")
