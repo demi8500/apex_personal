@@ -1,6 +1,7 @@
 # app.py - APEX Personal (minimal, fehlerfrei)
 # Passwort: bnc2500
 # Benötigt: streamlit, requests, pandas
+# Install: python -m pip install streamlit requests pandas
 
 import io
 import time
@@ -57,4 +58,9 @@ def login():
     if st.button("Anmelden"):
         if pwd == "bnc2500":
             st.session_state["authenticated"] = True
-            try
+            try:
+                st.experimental_rerun()
+            except Exception:
+                pass
+        else:
+      
