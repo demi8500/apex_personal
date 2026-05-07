@@ -1,4 +1,4 @@
-# app.py - APEX Personal (korrigiert)
+# app.py - APEX Personal (korrigiert, vollständige Datei)
 # Passwort: bnc2500
 # Single-file Streamlit App mit:
 # - Passwortschutz
@@ -27,32 +27,4 @@ st.markdown("""
 .stTextInput>div>div>input, .stNumberInput>div>div>input { background-color: #0f1724; color: #d6e1ff; border: 1px solid #223; }
 .card { background: #0f1724; padding: 12px; border-radius: 10px; border: 1px solid #233; }
 </style>
-""", unsafe_allow_html=True)
-
-# --------------------------
-# Coin mapping (symbols -> CoinGecko id)
-# --------------------------
-COINS = {
-    "BTC": "bitcoin",
-    "ETH": "ethereum",
-    "SOL": "solana",
-    "BNB": "binancecoin",
-    "XRP": "ripple",
-    "DOGE": "dogecoin",
-    "SHIB": "shiba-inu",
-    "PEPE": "pepe",
-    "BONK": "bonk",
-    "WIF": "wif",
-    "FLOKI": "floki",
-    "ADA": "cardano",
-    "AVAX": "avalanche-2",
-    "LINK": "chainlink",
-    "TON": "toncoin",
-}
-COIN_SYMBOLS = list(COINS.keys())
-
-# --------------------------
-# Utilities: CoinGecko APIs
-# --------------------------
-def fetch_prices(symbols):
-    ids = ",".join([COINS[s] for s in
+""", unsafe_allow_html=
