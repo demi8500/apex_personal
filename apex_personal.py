@@ -1,4 +1,4 @@
-# app.py - APEX Personal (final corrected single-file)
+# app.py - APEX Personal (final)
 # Passwort: bnc2500
 # Benötigt: streamlit, requests, pandas, numpy, plotly
 # Install: pip install streamlit requests pandas numpy plotly
@@ -69,4 +69,7 @@ def fetch_prices(symbols):
     return out
 
 def fetch_market_chart(symbol, days=90):
-  
+    cid = COINS.get(symbol)
+    if not cid:
+        return pd.DataFrame(columns=["timestamp", "price"])
+    url = f"https://api.coingecko.com/api/v3/coins/{cid}/market_ch
