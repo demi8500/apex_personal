@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
 import requests
-import random
-from datetime import datetime
 
 st.set_page_config(page_title="APEX Personal", layout="wide", page_icon="🌟")
 
@@ -21,56 +19,49 @@ if not st.session_state.auth:
             st.error("Falsches Passwort")
     st.stop()
 
-st.title("🌟 APEX Personal v6.1")
-st.subheader("Trading Signals + Portfolio Manager")
+st.title("🌟 APEX Personal v6.2")
+st.subheader("Viele Coins – Echte Portfolio Version")
 
-# Live Preise
+# Viele Coins von CoinMarketCap (über CoinGecko API)
 @st.cache_data(ttl=30)
 def get_prices():
     try:
-        r = requests.get("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,avalanche-2,chainlink,cardano&vs_currencies=usd")
+        ids = "bitcoin,ethereum,solana,binancecoin,ripple,dogecoin,cardano,avalanche-2,chainlink,toncoin,shiba-inu,polkadot,near-protocol,uniswap,tron,litecoin,bitcoin-cash"
+        r = requests.get(f"https://api.coingecko.com/api/v3/simple/price?ids={ids}&vs_currencies=usd")
         return r.json()
     except:
         return {}
 
 prices = get_prices()
 
-# Portfolio
+# Dein Portfolio
 if "my_holdings" not in st.session_state:
-    st.session_state.my_holdings = {"BTC": 0.0, "ETH": 0.0, "SOL": 0.0, "AVAX": 0.0, "LINK": 0.0, "ADA": 0.0}
+    st.session_state.my_holdings = {
+        "BTC": 0.0, "ETH": 0.0, "SOL": 0.0, "BNB": 0.0, "XRP": 0.0,
+        "DOGE": 0.0, "ADA": 0.0, "AVAX": 0.0, "LINK": 0.0, "TON": 0.0,
+        "SHIB": 0.0, "DOT": 0.0, "NEAR": 0.0, "UNI": 0.0, "TRX": 0.0
+    }
+    st.session_state.total_invested = 0.0
 
-menu = st.sidebar.selectbox("Menü", ["Dashboard", "Trading Signals", "Holdings bearbeiten", "Neue Investition", "Live Preise", "Ziel Simulator"])
+menu = st.sidebar.selectbox("Menü", ["Dashboard", "Holdings bearbeiten", "Neue Investition", "Live Preise", "Trading Signals", "Ziel Simulator"])
 
-if menu == "Trading Signals":
-    st.subheader("🔥 APEX Trading Signals")
-    st.warning("⚠️ Dies sind **nur simulierte Signale** zu Bildungszwecken. Keine Finanzberatung!")
+if menu == "Dashboard":
+    total_value = 0.0
+    data = []
+    for coin, amount in st.session_state.my_holdings.items():
+        if amount > 0:
+            price = prices.get(coin.lower().replace("xrp", "ripple").replace("doge", "dogecoin").replace("shib", "shiba-inu").replace("dot", "polkadot").replace("near", "near-protocol").replace("uni", "uniswap").replace("trx", "tron"), {}).get("usd", 0)
+            value = amount * price
+            total_value += value
+            data.append({"Coin": coin, "Menge": amount, "Preis": f"${price:,.4f}", "Wert ($)": round(value, 2)})
+    
+    st.metric("Gesamtwert Portfolio", f"${total_value:,.2f}")
+    if data:
+        st.dataframe(pd.DataFrame(data), use_container_width=True)
+    else:
+        st.info("Trage deine Holdings ein unter 'Holdings bearbeiten'")
 
-    for coin in ["BTC", "ETH", "SOL", "AVAX", "LINK"]:
-        price = prices.get(coin.lower(), {}).get("usd", 1000)
-        signal = random.choice(["STRONG BUY", "BUY", "HOLD", "SELL", "STRONG SELL"])
-        strength = random.randint(60, 95)
-        
-        col1, col2, col3 = st.columns([1,2,1])
-        with col1:
-            st.metric(coin, f"${price:,.2f}")
-        with col2:
-            if "BUY" in signal:
-                st.success(f"**{signal}**")
-            elif "SELL" in signal:
-                st.error(f"**{signal}**")
-            else:
-                st.warning(f"**{signal}**")
-        with col3:
-            st.progress(strength / 100)
-            st.caption(f"Stärke: {strength}%")
-
-    st.info("Tipp: Kaufe bei **STRONG BUY**, verkaufe bei **STRONG SELL**. Immer mit Risikomanagement arbeiten!")
-
-# Dashboard & andere Menüs (wie vorher)
-elif menu == "Dashboard":
-    # ... (früherer Code)
-    st.write("Dashboard - deine echten Holdings")
-
-# Rest der Menüs (Holdings bearbeiten, etc.) bleiben gleich wie vorher
-
-st.caption("APEX Personal v6.1 – Mit Trading Signals | Nur für dich")
+elif menu == "Holdings bearbeiten":
+    st.subheader("Deine echten Holdings")
+    for coin in st.session_state.my_holdings.keys():
+        st.session_state.my_hold
