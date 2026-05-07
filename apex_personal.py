@@ -58,4 +58,20 @@ elif menu == "Trading Signals":
     st.subheader("🔥 APEX Trading Signals")
     st.caption("Simulierte Signale — nur zu Bildungszwecken")
 
-    cols = st.columns(
+    cols = st.columns(3)
+    i = 0
+    for coin in st.session_state.my_holdings.keys():
+        with cols[i % 3]:
+            price = prices.get(coin.lower().replace("xrp","ripple").replace("doge","dogecoin").replace("shib","shiba-inu").replace("dot","polkadot").replace("near","near-protocol").replace("uni","uniswap").replace("trx","tron"), {}).get("usd", 1000)
+            signal = random.choice(["STRONG BUY", "BUY", "HOLD", "SELL", "STRONG SELL"])
+            
+            if "STRONG BUY" in signal or "BUY" in signal:
+                st.success(f"**{coin}**\n{signal}\n${price:,.4f}")
+            elif "SELL" in signal:
+                st.error(f"**{coin}**\n{signal}\n${price:,.4f}")
+            else:
+                st.warning(f"**{coin}**\n{signal}\n${price:,.4f}")
+        i += 1
+
+elif menu == "Holdings bearbeiten":
+    st.subheader("Hold
