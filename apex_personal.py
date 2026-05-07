@@ -20,17 +20,17 @@ if not st.session_state.auth:
             st.error("Falsches Passwort")
     st.stop()
 
-st.title("🌟 APEX Personal - Finale Version")
-st.subheader("Viele Coins + Trading Signals")
+st.title("🌟 APEX Personal")
+st.subheader("Major Coins + Memecoins")
 
-# Viele Coins
-coins = ["BTC", "ETH", "SOL", "BNB", "XRP", "DOGE", "ADA", "AVAX", "LINK", "TON", "SHIB", "DOT", "NEAR", "UNI", "TRX", "SUI", "PEPE"]
+# Alle Coins (Major + Memecoins)
+coins = ["BTC", "ETH", "SOL", "BNB", "XRP", "DOGE", "SHIB", "PEPE", "BONK", "WIF", "FLOKI", "BRETT", "POPCAT", "ADA", "AVAX", "LINK", "TON"]
 
 # Live Preise
 @st.cache_data(ttl=30)
 def get_prices():
     try:
-        ids = "bitcoin,ethereum,solana,binancecoin,ripple,dogecoin,cardano,avalanche-2,chainlink,toncoin,shiba-inu,polkadot,near-protocol,uniswap,tron"
+        ids = "bitcoin,ethereum,solana,binancecoin,ripple,dogecoin,shiba-inu,pepe,bonk,dogwifhat,floki,brett,popcat,cardano,avalanche-2,chainlink,toncoin"
         r = requests.get(f"https://api.coingecko.com/api/v3/simple/price?ids={ids}&vs_currencies=usd")
         return r.json()
     except:
@@ -49,7 +49,7 @@ if menu == "Dashboard":
     data = []
     for coin, amount in st.session_state.my_holdings.items():
         if amount > 0:
-            price = prices.get(coin.lower().replace("xrp","ripple").replace("doge","dogecoin").replace("shib","shiba-inu"), {}).get("usd", 0)
+            price = prices.get(coin.lower().replace("wif","dogwifhat").replace("shib","shiba-inu").replace("pepe","pepe").replace("bonk","bonk"), {}).get("usd", 0)
             value = amount * price
             total += value
             data.append({"Coin": coin, "Menge": amount, "Wert ($)": round(value, 2)})
@@ -58,42 +58,12 @@ if menu == "Dashboard":
         st.dataframe(pd.DataFrame(data), use_container_width=True)
 
 elif menu == "Trading Signals":
-    st.subheader("🔥 Trading Signals (viele Coins)")
+    st.subheader("🔥 Trading Signals (inkl. Memecoins)")
     st.caption("Simulierte Signale – nur zu Bildungszwecken")
     
     cols = st.columns(3)
     i = 0
     for coin in coins:
         with cols[i % 3]:
-            price = prices.get(coin.lower().replace("xrp","ripple").replace("doge","dogecoin").replace("shib","shiba-inu"), {}).get("usd", 1000)
-            signal = random.choice(["STRONG BUY", "BUY", "HOLD", "SELL", "STRONG SELL"])
-            if "BUY" in signal:
-                st.success(f"**{coin}**\n{signal}\n${price:,.4f}")
-            elif "SELL" in signal:
-                st.error(f"**{coin}**\n{signal}\n${price:,.4f}")
-            else:
-                st.warning(f"**{coin}**\n{signal}\n${price:,.4f}")
-        i += 1
-
-elif menu == "Holdings bearbeiten":
-    st.subheader("Deine echten Holdings bearbeiten")
-    for coin in coins:
-        st.session_state.my_holdings[coin] = st.number_input(f"{coin} Menge", value=st.session_state.my_holdings[coin], step=0.00001, format="%.5f")
-    if st.button("Speichern"):
-        st.success("Holdings gespeichert!")
-
-elif menu == "Neue Investition":
-    amount = st.number_input("Betrag USDC", min_value=10.0, value=500.0)
-    coin = st.selectbox("Coin", coins)
-    if st.button("Speichern"):
-        current_price = prices.get(coin.lower().replace("xrp","ripple").replace("doge","dogecoin"), {}).get("usd", 1000)
-        st.session_state.my_holdings[coin] += amount / current_price
-        st.success(f"{amount}$ in {coin} hinzugefügt!")
-
-elif menu == "Live Preise":
-    st.subheader("Live Preise")
-    for coin in coins:
-        price = prices.get(coin.lower().replace("xrp","ripple").replace("doge","dogecoin"), {}).get("usd", 0)
-        st.metric(coin, f"${price:,.4f}")
-
-st.caption("APEX Personal - Mit vielen Coins | Nur für dich")
+            price = prices.get(coin.lower().replace("wif","dogwifhat").replace("shib","shiba-inu").replace("pepe","pepe").replace("bonk","bonk"), {}).get("usd", 1000)
+            signal = random.choice(["STRONG BUY", "BUY", "HOLD", "SELL", "STRONG SELL
