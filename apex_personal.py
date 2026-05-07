@@ -3,9 +3,7 @@ import pandas as pd
 import requests
 import time
 from datetime import datetime
-import json
-import plotly.express as px
-import plotly.graph_objects as go
+import random
 
 # Page configuration
 st.set_page_config(
@@ -15,7 +13,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for dark theme and modern design
+# Custom CSS for dark theme
 st.markdown("""
 <style>
     .main-header {
@@ -24,13 +22,6 @@ st.markdown("""
         color: #00ff88;
         text-align: center;
         margin-bottom: 2rem;
-    }
-    .metric-card {
-        background: linear-gradient(135deg, #1e1e1e, #2d2d2d);
-        padding: 1rem;
-        border-radius: 10px;
-        border: 1px solid #333;
-        margin: 0.5rem 0;
     }
     .signal-strong-buy {
         background: linear-gradient(135deg, #00ff88, #00cc6a);
@@ -80,10 +71,12 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Coin mapping for CoinGecko API
+# Coin mapping
+COINS = ['BTC', 'ETH', 'SOL', 'BNB', 'XRP', 'DOGE', 'SHIB', 'PEPE', 'BONK', 'WIF', 'FLOKI', 'ADA', 'AVAX', 'LINK', 'TON']
+
 COIN_MAPPING = {
     'BTC': 'bitcoin',
-    'ETH': 'ethereum',
+    'ETH': 'ethereum', 
     'SOL': 'solana',
     'BNB': 'binancecoin',
     'XRP': 'ripple',
@@ -96,10 +89,4 @@ COIN_MAPPING = {
     'ADA': 'cardano',
     'AVAX': 'avalanche-2',
     'LINK': 'chainlink',
-    'TON': 'the-open-network'
-}
-
-# Initialize session state
-def init_session_state():
-    if 'authenticated' not in st.session_state:
-        st.session_state.authenticated
+    'TON': 'the
