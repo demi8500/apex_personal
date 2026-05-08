@@ -23,14 +23,11 @@ if not st.session_state.auth:
 st.title("🌟 APEX Personal")
 st.subheader("Major Coins + Memecoins")
 
-# Coins
 coins = ["BTC", "ETH", "SOL", "BNB", "XRP", "DOGE", "SHIB", "PEPE", "BONK", "WIF", "FLOKI", "ADA", "AVAX", "LINK", "TON"]
 
-# Portfolio
 if "my_holdings" not in st.session_state:
     st.session_state.my_holdings = {coin: 0.0 for coin in coins}
 
-# Live Preise
 @st.cache_data(ttl=30)
 def get_prices():
     try:
@@ -49,18 +46,4 @@ if menu == "Dashboard":
     data = []
     for coin, amount in st.session_state.my_holdings.items():
         if amount > 0:
-            price = prices.get(coin.lower().replace("wif","dogwifhat").replace("shib","shiba-inu").replace("pepe","pepe").replace("bonk","bonk"), {}).get("usd", 0)
-            value = amount * price
-            total += value
-            data.append({"Coin": coin, "Menge": amount, "Wert ($)": round(value, 2)})
-    st.metric("Gesamtwert Portfolio", f"${total:,.2f}")
-    if data:
-        st.dataframe(pd.DataFrame(data), use_container_width=True)
-    else:
-        st.info("Noch keine Holdings. Gehe zu 'Holdings bearbeiten'")
-
-elif menu == "Trading Signals":
-    st.subheader("🔥 Trading Signals")
-    st.caption("Simulierte Signale – nur zu Bildungszwecken")
-    for coin in coins:
-        price = prices.get(coin.lower().replace("wif
+            price = prices.get(coin.lower().replace("wif","dogwifhat").replace("shib","shiba-inu").replace("pepe","pepe").replace("bonk","bonk
